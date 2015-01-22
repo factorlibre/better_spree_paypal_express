@@ -7,10 +7,11 @@ module Spree
       items = order.line_items.map(&method(:line_item))
 
       tax_adjustments = order.all_adjustments.tax.additional
+      included_tax_adjustments = order.all_adjustments.tax.included
       shipping_adjustments = order.all_adjustments.shipping
 
       order.all_adjustments.eligible.each do |adjustment|
-        next if (tax_adjustments + shipping_adjustments).include?(adjustment)
+        next if (tax_adjustments + included_tax_adjustments + shipping_adjustments).include?(adjustment)
         items << {
           :Name => adjustment.label,
           :Quantity => 1,
@@ -32,6 +33,7 @@ module Spree
 
       begin
         pp_response = provider.set_express_checkout(pp_request)
+        binding.pry
         if pp_response.success?
           redirect_to provider.express_checkout_url(pp_response, :useraction => 'commit')
         else
