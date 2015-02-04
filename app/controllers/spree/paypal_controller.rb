@@ -7,7 +7,6 @@ module Spree
       items = order.line_items.map(&method(:line_item))
 
       tax_adjustments = order.all_adjustments.tax.additional
-      included_tax_adjustments = order.all_adjustments.tax.included
       shipping_adjustments = order.all_adjustments.shipping
 
       order.all_adjustments.eligible.each do |adjustment|
@@ -175,6 +174,10 @@ module Spree
 
     def address_required?
       payment_method.preferred_solution.eql?('Sole')
+    end
+
+    def included_tax_adjustments
+      @included_tax_adjustments ||= current_order.all_adjustments.tax.find_all {|a| a.included == true }
     end
   end
 end
